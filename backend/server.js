@@ -1,5 +1,5 @@
 const express = require('express');
-const axios = require('axios');
+const { OpenAI } = require("openai"); // Import from the openai library
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -13,28 +13,24 @@ app.use(cors());
 // Middleware to parse JSON requests
 app.use(express.json());
 
+// Initialize OpenAI client with API key from .env
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 // OpenAI API endpoint
 app.post('/api/generate', async (req, res) => {
   const { prompt } = req.body;
 
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/completions',
-      {
-        model: 'text-davinci-003', // or GPT-4 depending on the model you're using
-        prompt: prompt,
-        max_tokens: 150,
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o", // Use gpt-4o model
+      messages: [
+        { "role": "user", "content": prompt } // Use the user's prompt
+      ]
+    });
 
-    res.json({ result: response.data.choices[0].text.trim() });
+    res.json({ result: completion.choices[0].message.content }); // Send back the generated text
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while generating content' });
