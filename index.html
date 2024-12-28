@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scrallex - Generate AI Title</title>
+  <title>Scrallex - Generate AI Title & YouTube Thumbnail</title>
   <style>
     /* Add your styles here */
     #loader {
@@ -13,28 +13,45 @@
       text-align: center;
       margin-top: 20px;
     }
+    /* Additional styles from remote changes */
+    body {
+      font-family: 'SF Pro Display', sans-serif;
+      background-color: #000;
+      color: #f5f5f7;
+    }
+    /* Other styling from remote */
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- AI Title Generator Section -->
     <h1>AI Title Generator</h1>
     <textarea id="promptInput" placeholder="Enter your prompt..." rows="4"></textarea>
     <button id="generateBtn">Generate</button>
-
-    <!-- Loading spinner -->
     <div id="loader">Generating...</div>
-
     <div id="outputContainer" class="hidden">
       <h2>Generated Title:</h2>
       <div id="styledTitle"></div>
     </div>
+
+    <!-- YouTube Thumbnail Generator Section -->
+    <h1>YouTube Thumbnail Generator</h1>
+    <textarea id="promptInputThumbnail" class="apple-input w-full mb-6 resize-none" placeholder="Enter your YouTube title or stream topic here" rows="4"></textarea>
+    <button id="generateThumbnailBtn">Generate Thumbnail</button>
+    <div id="thumbnailOutput" class="hidden">
+      <div class="image-wrapper youtube">
+        <img id="thumbnailImage" src="" alt="Thumbnail Image" class="rounded-xl">
+      </div>
+    </div>
+
   </div>
 
   <script>
+    // AI Title Generator Functionality
     const generateBtn = document.getElementById('generateBtn');
     const promptInput = document.getElementById('promptInput');
     const outputContainer = document.getElementById('outputContainer');
-    const loader = document.getElementById('loader'); // Loader element
+    const loader = document.getElementById('loader'); 
 
     generateBtn.addEventListener('click', async () => {
       const prompt = promptInput.value;
@@ -43,18 +60,16 @@
       loader.style.display = 'block';
 
       try {
-        // Send the prompt to the backend API
+        // Send the prompt to the backend API for AI Title generation
         const response = await fetch('http://localhost:3000/api/generate', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: prompt }),
         });
 
         const data = await response.json();
         if (data.result) {
-          // Display the result in the frontend
+          // Display the result
           const styledTitle = document.getElementById('styledTitle');
           styledTitle.textContent = data.result;
           outputContainer.classList.remove('hidden');
@@ -62,9 +77,22 @@
       } catch (error) {
         console.error('Error:', error);
       } finally {
-        // Hide loader
         loader.style.display = 'none';
       }
+    });
+
+    // YouTube Thumbnail Generator Functionality
+    const generateThumbnailBtn = document.getElementById('generateThumbnailBtn');
+    const promptInputThumbnail = document.getElementById('promptInputThumbnail');
+    const thumbnailOutput = document.getElementById('thumbnailOutput');
+    const thumbnailImage = document.getElementById('thumbnailImage');
+
+    generateThumbnailBtn.addEventListener('click', async () => {
+      const prompt = promptInputThumbnail.value;
+      // Simulate thumbnail generation
+      const imageUrl = `https://via.placeholder.com/1920x1080.png?text=${encodeURIComponent(prompt)}`;
+      thumbnailImage.src = imageUrl;
+      thumbnailOutput.classList.remove('hidden');
     });
   </script>
 </body>
