@@ -1,71 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scrallex - Generate AI Title</title>
-  <style>
-    /* Add your styles here */
-    #loader {
-      display: none;
-      font-size: 16px;
-      color: #fff;
-      text-align: center;
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Generator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #loader {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #outputContainer {
+            margin-top: 20px;
+        }
+
+        .output-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .output-section h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        .thumbnail-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #eee;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>AI Title Generator</h1>
-    <textarea id="promptInput" placeholder="Enter your prompt..." rows="4"></textarea>
-    <button id="generateBtn">Generate</button>
+    <div class="container">
+        <h1>AI Content Generator</h1>
+        <textarea id="promptInput" placeholder="Enter your prompt here..." rows="5"></textarea>
+        <button id="generateBtn">Generate Content</button>
 
-    <!-- Loading spinner -->
-    <div id="loader">Generating...</div>
+        <div id="loader">Generating...</div>
 
-    <div id="outputContainer" class="hidden">
-      <h2>Generated Title:</h2>
-      <div id="styledTitle"></div>
+        <div id="outputContainer" style="display: none;">
+            <div class="output-section">
+                <h3>Generated Title</h3>
+                <div id="styledTitle"></div>
+            </div>
+            <div class="output-section">
+                <h3>Generated Description</h3>
+                <div id="description"></div>
+            </div>
+            <div class="output-section">
+                <h3>Generated Thumbnail</h3>
+                <div class="thumbnail-placeholder">Thumbnail Placeholder</div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const generateBtn = document.getElementById('generateBtn');
-    const promptInput = document.getElementById('promptInput');
-    const outputContainer = document.getElementById('outputContainer');
-    const loader = document.getElementById('loader'); // Loader element
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const promptInput = document.getElementById('promptInput');
+        const outputContainer = document.getElementById('outputContainer');
+        const loader = document.getElementById('loader');
+        const styledTitle = document.getElementById('styledTitle');
+        const description = document.getElementById('description');
 
-    generateBtn.addEventListener('click', async () => {
-      const prompt = promptInput.value;
+        generateBtn.addEventListener('click', async () => {
+            const prompt = promptInput.value;
 
-      // Show loader
-      loader.style.display = 'block';
+            loader.style.display = 'block';
+            outputContainer.style.display = 'none';
 
-      try {
-        // Send the prompt to the backend API
-        const response = await fetch('http://localhost:3000/api/generate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ prompt: prompt }),
+            try {
+                const response = await fetch('http://localhost:3000/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt }),
+                });
+
+                const data = await response.json();
+                if (data.result) {
+                    styledTitle.textContent = data.result;
+                    description.textContent = "Generated description will go here..."; // Placeholder
+                    outputContainer.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                loader.style.display = 'none';
+            }
         });
-
-        const data = await response.json();
-        if (data.result) {
-          // Display the result in the frontend
-          const styledTitle = document.getElementById('styledTitle');
-          styledTitle.textContent = data.result;
-          outputContainer.classList.remove('hidden');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        // Hide loader
-        loader.style.display = 'none';
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
