@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scrallex - Generate AI Title</title>
+  <style>
+    /* Add your styles here */
+    #loader {
+      display: none;
+      font-size: 16px;
+      color: #fff;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Title Generator</h1>
+    <textarea id="promptInput" placeholder="Enter your prompt..." rows="4"></textarea>
+    <button id="generateBtn">Generate</button>
+
+    <!-- Loading spinner -->
+    <div id="loader">Generating...</div>
+
+    <div id="outputContainer" class="hidden">
+      <h2>Generated Title:</h2>
+      <div id="styledTitle"></div>
+    </div>
+  </div>
+
+  <script>
+    const generateBtn = document.getElementById('generateBtn');
+    const promptInput = document.getElementById('promptInput');
+    const outputContainer = document.getElementById('outputContainer');
+    const loader = document.getElementById('loader'); // Loader element
+
+    generateBtn.addEventListener('click', async () => {
+      const prompt = promptInput.value;
+
+      // Show loader
+      loader.style.display = 'block';
+
+      try {
+        // Send the prompt to the backend API
+        const response = await fetch('http://localhost:3000/api/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt: prompt }),
+        });
+
+        const data = await response.json();
+        if (data.result) {
+          // Display the result in the frontend
+          const styledTitle = document.getElementById('styledTitle');
+          styledTitle.textContent = data.result;
+          outputContainer.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        // Hide loader
+        loader.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
