@@ -1,99 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scrallex - Generate AI Title & YouTube Thumbnail</title>
-  <style>
-    /* Add your styles here */
-    #loader {
-      display: none;
-      font-size: 16px;
-      color: #fff;
-      text-align: center;
-      margin-top: 20px;
-    }
-    /* Additional styles from remote changes */
-    body {
-      font-family: 'SF Pro Display', sans-serif;
-      background-color: #000;
-      color: #f5f5f7;
-    }
-    /* Other styling from remote */
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Generator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #loader {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #outputContainer {
+            margin-top: 20px;
+        }
+
+        .output-section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .output-section h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        .thumbnail-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #eee;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- AI Title Generator Section -->
-    <h1>AI Title Generator</h1>
-    <textarea id="promptInput" placeholder="Enter your prompt..." rows="4"></textarea>
-    <button id="generateBtn">Generate</button>
-    <div id="loader">Generating...</div>
-    <div id="outputContainer" class="hidden">
-      <h2>Generated Title:</h2>
-      <div id="styledTitle"></div>
+    <div class="container">
+        <h1>AI Content Generator</h1>
+        <textarea id="promptInput" placeholder="Enter your prompt here..." rows="5"></textarea>
+        <button id="generateBtn">Generate Content</button>
+
+        <div id="loader">Generating...</div>
+
+        <div id="outputContainer" style="display: none;">
+            <div class="output-section">
+                <h3>Generated Title</h3>
+                <div id="styledTitle"></div>
+            </div>
+            <div class="output-section">
+                <h3>Generated Description</h3>
+                <div id="description"></div>
+            </div>
+            <div class="output-section">
+                <h3>Generated Thumbnail</h3>
+                <div class="thumbnail-placeholder">Thumbnail Placeholder</div>
+            </div>
+        </div>
     </div>
 
-    <!-- YouTube Thumbnail Generator Section -->
-    <h1>YouTube Thumbnail Generator</h1>
-    <textarea id="promptInputThumbnail" class="apple-input w-full mb-6 resize-none" placeholder="Enter your YouTube title or stream topic here" rows="4"></textarea>
-    <button id="generateThumbnailBtn">Generate Thumbnail</button>
-    <div id="thumbnailOutput" class="hidden">
-      <div class="image-wrapper youtube">
-        <img id="thumbnailImage" src="" alt="Thumbnail Image" class="rounded-xl">
-      </div>
-    </div>
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const promptInput = document.getElementById('promptInput');
+        const outputContainer = document.getElementById('outputContainer');
+        const loader = document.getElementById('loader');
+        const styledTitle = document.getElementById('styledTitle');
+        const description = document.getElementById('description');
 
-  </div>
+        generateBtn.addEventListener('click', async () => {
+            const prompt = promptInput.value;
 
-  <script>
-    // AI Title Generator Functionality
-    const generateBtn = document.getElementById('generateBtn');
-    const promptInput = document.getElementById('promptInput');
-    const outputContainer = document.getElementById('outputContainer');
-    const loader = document.getElementById('loader'); 
+            loader.style.display = 'block';
+            outputContainer.style.display = 'none';
 
-    generateBtn.addEventListener('click', async () => {
-      const prompt = promptInput.value;
+            try {
+                const response = await fetch('http://localhost:3000/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt }),
+                });
 
-      // Show loader
-      loader.style.display = 'block';
-
-      try {
-        // Send the prompt to the backend API for AI Title generation
-        const response = await fetch('http://localhost:3000/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: prompt }),
+                const data = await response.json();
+                if (data.result) {
+                    styledTitle.textContent = data.result;
+                    description.textContent = "Generated description will go here..."; // Placeholder
+                    outputContainer.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                loader.style.display = 'none';
+            }
         });
-
-        const data = await response.json();
-        if (data.result) {
-          // Display the result
-          const styledTitle = document.getElementById('styledTitle');
-          styledTitle.textContent = data.result;
-          outputContainer.classList.remove('hidden');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        loader.style.display = 'none';
-      }
-    });
-
-    // YouTube Thumbnail Generator Functionality
-    const generateThumbnailBtn = document.getElementById('generateThumbnailBtn');
-    const promptInputThumbnail = document.getElementById('promptInputThumbnail');
-    const thumbnailOutput = document.getElementById('thumbnailOutput');
-    const thumbnailImage = document.getElementById('thumbnailImage');
-
-    generateThumbnailBtn.addEventListener('click', async () => {
-      const prompt = promptInputThumbnail.value;
-      // Simulate thumbnail generation
-      const imageUrl = `https://via.placeholder.com/1920x1080.png?text=${encodeURIComponent(prompt)}`;
-      thumbnailImage.src = imageUrl;
-      thumbnailOutput.classList.remove('hidden');
-    });
-  </script>
+    </script>
 </body>
 </html>
