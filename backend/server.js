@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const { OpenAI } = require("openai"); // Import from the openai library
 const dotenv = require('dotenv');
@@ -35,6 +36,10 @@ app.post('/api/generate', async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while generating content' });
   }
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 app.listen(PORT, () => {
